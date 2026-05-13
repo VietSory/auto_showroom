@@ -30,8 +30,14 @@ cloudinary.config({
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const HOST = process.env.HOST || "0.0.0.0";
 
 // CORS configuration — supports Vercel, S3, CloudFront, custom domain
+const corsOriginsFromEnv = (process.env.CORS_ORIGINS || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
 const allowedOrigins = [
     // Local dev
     'http://localhost:3000',
@@ -42,6 +48,7 @@ const allowedOrigins = [
     // S3 static website (thay YOUR_BUCKET_NAME và REGION)
     process.env.CLIENT_URL,               // ← set biến này trên EC2
     process.env.CLOUDFRONT_URL,           // ← nếu dùng CloudFront
+    ...corsOriginsFromEnv,
 ].filter(Boolean); // Xóa undefined
 
 app.use(cors({
@@ -84,10 +91,10 @@ app.use("/api/vouchers", voucherRoutes);
 app.use("/api/order", orderRoutes);
 
 // Serve static files in production
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'production' && process.env.SERVE_CLIENT === 'true') {
     const clientDistPath = path.join(__dirname, '../client/dist');
     app.use(express.static(clientDistPath));
-    
+
     app.get('*', (req, res) => {
         res.sendFile(path.join(clientDistPath, 'index.html'));
     });
@@ -115,8 +122,8 @@ const vercelHandler = app;
 
 // For Vercel, export the app; for local, start server
 if (!process.env.VERCEL) {
-    app.listen(PORT, () => {
-        console.log(`Server is running on port ${PORT}`);
+    app.listen(PORT, HOST, () => {
+        console.log(`Server is running on http://${HOST}:${PORT}`);
     });
 }
 

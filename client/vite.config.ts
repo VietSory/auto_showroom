@@ -1,59 +1,63 @@
 import path from "path"
 import react from "@vitejs/plugin-react"
-import { defineConfig } from "vite"
+import { defineConfig, loadEnv } from "vite"
 
-export default defineConfig({
-	plugins: [react()],
+export default defineConfig(({ mode }) => {
+	const env = loadEnv(mode, process.cwd(), "VITE_");
 
-	base: "/", // bắt buộc cho EC2, tránh asset 404
+	return {
+		plugins: [react()],
 
-	resolve: {
-		alias: {
-			"@": path.resolve(__dirname, "./src"),
-		},
-	},
+		base: env.VITE_BASE || "/",
 
-	server: {
-		proxy: {
-			"/api": {
-				target: "http://localhost:5000",
-				changeOrigin: true,
+		resolve: {
+			alias: {
+				"@": path.resolve(__dirname, "./src"),
 			},
 		},
-	},
 
-	build: {
-		outDir: "../dist",
-		minify: "esbuild",
-		assetsInlineLimit: 4096,
-		sourcemap: false,
-		rollupOptions: {
-			output: {
-				manualChunks: {
-					vendor: ["react", "react-dom"],
-					ui: ["@radix-ui/react-dialog", "@radix-ui/react-select", "@radix-ui/react-toast"],
-					three: ["three", "@react-three/fiber", "@react-three/drei"],
-					animation: ["framer-motion", "gsap", "aos"],
-					charts: ["recharts"],
-					icons: ["react-icons", "lucide-react"],
+		server: {
+			proxy: {
+				"/api": {
+					target: env.VITE_DEV_API_URL || "http://localhost:5000",
+					changeOrigin: true,
 				},
 			},
 		},
-	},
 
-	// Tối ưu hóa dependencies — three chuyển vào include để tránh conflict với manualChunks
-	optimizeDeps: {
-		include: [
-			"react",
-			"react-dom",
-			"react-router-dom",
-			"@tanstack/react-query",
-			"framer-motion",
-			"three", // chuyển từ exclude → include
-		],
-	},
+		build: {
+			outDir: "dist",
+			minify: "esbuild",
+			assetsInlineLimit: 4096,
+			sourcemap: false,
+			rollupOptions: {
+				output: {
+					manualChunks: {
+						vendor: ["react", "react-dom"],
+						ui: ["@radix-ui/react-dialog", "@radix-ui/react-select", "@radix-ui/react-toast"],
+						three: ["three", "@react-three/fiber", "@react-three/drei"],
+						animation: ["framer-motion", "gsap", "aos"],
+						charts: ["recharts"],
+						icons: ["react-icons", "lucide-react"],
+					},
+				},
+			},
+		},
 
-	esbuild: {
-		target: "es2020",
-	},
+		// Tối ưu hóa dependencies — three chuyển vào include để tránh conflict với manualChunks
+		optimizeDeps: {
+			include: [
+				"react",
+				"react-dom",
+				"react-router-dom",
+				"@tanstack/react-query",
+				"framer-motion",
+				"three", // chuyển từ exclude → include
+			],
+		},
+
+		esbuild: {
+			target: "es2020",
+		},
+	};
 });

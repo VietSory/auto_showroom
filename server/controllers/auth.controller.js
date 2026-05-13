@@ -30,14 +30,6 @@ export const signup = async (req, res) => {
 			return res.status(400).json({ error: "Email is already taken " });
 		}
 
-		const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
-
-		if (!passwordRegex.test(password)) {
-			return res.status(400).json({
-				error: "Password must contain at least 8 characters, 1 uppercase letter, 1 lowercase letter, and 1 number",
-			});
-		}
-
 		// hash password
 		// 123456 -> aooiwjdo@_AWD!@__ASD>A??^!@(#j
 		const salt = await bcrypt.genSalt(10);
@@ -138,14 +130,6 @@ export const resetPassword = async (req, res) => {
 			return res.status(400).json({ error: "Passwords do not match" });
 		}
 
-		const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
-		if (!passwordRegex.test(newPass)) {
-			return res.status(400).json({
-				error: "Password must contain at least 8 characters, 1 uppercase letter, 1 lowercase letter, and 1 number",
-			});
-
-
-		}
 		const salt = await bcrypt.genSalt(10);
 		const hashedPassword = await bcrypt.hash(newPass, salt);
 

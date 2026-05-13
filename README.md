@@ -139,6 +139,67 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- DEPLOYMENT -->
+## Deployment (AWS S3 + EC2)
+
+### 1) Client on S3
+
+Build the client and upload to S3:
+
+```sh
+cd client
+npm install
+npm run build
+```
+
+Upload the `client/dist` folder to your S3 bucket, enable **Static website hosting**, and set:
+- Index document: `index.html`
+- Error document: `index.html` (SPA fallback)
+
+**Environment variables for client** (set when building locally or in CI):
+
+```
+VITE_API_URL=https://YOUR_EC2_DOMAIN_OR_IP/api
+VITE_BASE=/
+```
+
+Optional for local dev proxy:
+
+```
+VITE_DEV_API_URL=http://localhost:5000
+```
+
+### 2) Server on EC2
+
+On your EC2 instance:
+
+```sh
+cd server
+npm install
+node index.js
+```
+
+**Environment variables for server** (EC2):
+
+```
+NODE_ENV=production
+PORT=5000
+HOST=0.0.0.0
+CLIENT_URL=https://YOUR_S3_OR_CLOUDFRONT_DOMAIN
+CORS_ORIGINS=https://YOUR_S3_OR_CLOUDFRONT_DOMAIN
+SERVE_CLIENT=false
+```
+
+If you want the server to serve the built client (not recommended when using S3), set:
+
+```
+SERVE_CLIENT=true
+```
+
+Open inbound ports on EC2 (e.g., `5000` or `80/443` via reverse proxy).
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 <!-- CONTRIBUTING -->
 ## Contributing
 
