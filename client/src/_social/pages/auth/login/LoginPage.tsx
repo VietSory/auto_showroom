@@ -10,6 +10,7 @@ import { Button } from "@material-tailwind/react";
 
 import LoginRepon from "./LoginRepon";
 import { useMutation } from "@tanstack/react-query";
+import { authApi } from "@/api/auth";
 import LoadingSpinner from "@/components/social/ui/common/LoadingSpinner";
 import {
 	InputOTP,
@@ -66,18 +67,9 @@ const LoginPage: React.FC = () => {
 	const { mutate: sendToken, isPending: isSendingToken } = useMutation({
 		mutationFn: async (email: string) => {
 			try {
-				const res = await fetch("/api/auth/confirm/sendToken", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({ email }),
-				});
-				const data = await res.json();
-				if (!res.ok)
-					throw new Error(data.error || "Failed to send token.");
+				const data = await authApi.sendToken(email);
 				return data;
-			} catch (error) {
+			} catch (error: any) {
 				throw new Error(error.message);
 			}
 		},
@@ -93,18 +85,9 @@ const LoginPage: React.FC = () => {
 	const {mutate: sendForgotpassword, isPending: isSending, data: otpCode} = useMutation({
         mutationFn: async (email: string) => {
             try {
-                const res = await fetch("/api/auth/confirm/sendResetToken", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ email }),
-                });
-                const data = await res.json();
-                if (!res.ok)
-                    throw new Error(data.error || "Failed to send token.");
+                const data = await authApi.sendResetToken(email);
                 return data;
-            } catch (error) {
+            } catch (error: any) {
                 throw new Error(error.message);
             }
         },
@@ -114,22 +97,11 @@ const LoginPage: React.FC = () => {
     });
 
 	const { mutate: signup, isError, error, isPending: isSigningup } = useMutation({
-		mutationFn: async (formData) => {
+		mutationFn: async (formData: any) => {
 			try {
-				const res = await fetch("/api/auth/signup", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(formData),
-				});
-
-				const data = await res.json();
-				if (!res.ok)
-					throw new Error(data.error || "Failed to create account.");
-				// console.log(data);
+				const data = await authApi.signup(formData);
 				return data;
-			} catch (error) {
+			} catch (error: any) {
 				throw new Error(error.message);
 			}
 		},
@@ -140,20 +112,12 @@ const LoginPage: React.FC = () => {
 	});
 
 	const { mutate: resetPass, isPending: isReseting } = useMutation({
-           mutationFn: async (changePassData)  => {
+           mutationFn: async (changePassData: any)  => {
             try {
-                const res = await fetch("/api/auth/resetPassword", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(changePassData),
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "Failed to reset password.");
+                const data = await authApi.resetPassword(changePassData);
                 console.log(data);
                 return data;
-            } catch (error) {
+            } catch (error: any) {
                 throw new Error(error.message);
             }
         },
@@ -235,18 +199,10 @@ const LoginPage: React.FC = () => {
 		event.preventDefault();
 		setIsPending(true);
 		try {
-			const res = await fetch("/api/auth/login", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(signInData),
-			});
-			const data = await res.json();
-			if (!res.ok) throw new Error(data.error || "Failed to login.");
+			await authApi.login(signInData);
 			queryClient.invalidateQueries({ queryKey: ["authUser"] });
 			resetFormInputs();
-		} catch (error) {
+		} catch (error: any) {
 			toast.error(error.message);
 		} finally {
 			setIsPending(false);
