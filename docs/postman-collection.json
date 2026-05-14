@@ -1,0 +1,187 @@
+{
+  "info": {
+    "name": "AWS Lambda Demo API",
+    "description": "Collection để test AWS Lambda + API Gateway demo products API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "api_gateway_url",
+      "value": "https://your-api-id.execute-api.region.amazonaws.com",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Get All Products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{api_gateway_url}}/demo/products?limit=10",
+          "host": ["{{api_gateway_url}}"],
+          "path": ["demo", "products"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "10",
+              "description": "Number of products to return"
+            },
+            {
+              "key": "brand",
+              "value": "Mercedes",
+              "description": "Filter by brand",
+              "disabled": true
+            }
+          ]
+        },
+        "description": "Lấy danh sách tất cả sản phẩm demo"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Product by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{api_gateway_url}}/demo/products/demo-1",
+          "host": ["{{api_gateway_url}}"],
+          "path": ["demo", "products", "demo-1"]
+        },
+        "description": "Lấy chi tiết một sản phẩm theo ID"
+      },
+      "response": []
+    },
+    {
+      "name": "Create Demo Request",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Nguyen Van A\",\n  \"email\": \"nguyenvana@example.com\",\n  \"phone\": \"+84 123 456 789\",\n  \"productId\": \"demo-1\",\n  \"message\": \"I'm interested in test driving this car. Please contact me.\"\n}"
+        },
+        "url": {
+          "raw": "{{api_gateway_url}}/demo/request",
+          "host": ["{{api_gateway_url}}"],
+          "path": ["demo", "request"]
+        },
+        "description": "Tạo yêu cầu demo/test drive"
+      },
+      "response": []
+    },
+    {
+      "name": "CORS Preflight",
+      "request": {
+        "method": "OPTIONS",
+        "header": [
+          {
+            "key": "Origin",
+            "value": "https://your-s3-website.com"
+          },
+          {
+            "key": "Access-Control-Request-Method",
+            "value": "GET"
+          }
+        ],
+        "url": {
+          "raw": "{{api_gateway_url}}/demo/products",
+          "host": ["{{api_gateway_url}}"],
+          "path": ["demo", "products"]
+        },
+        "description": "Test CORS preflight request"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Products - Filter by Brand",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{api_gateway_url}}/demo/products?brand=Audi&limit=5",
+          "host": ["{{api_gateway_url}}"],
+          "path": ["demo", "products"],
+          "query": [
+            {
+              "key": "brand",
+              "value": "Audi"
+            },
+            {
+              "key": "limit",
+              "value": "5"
+            }
+          ]
+        },
+        "description": "Lấy sản phẩm theo brand"
+      },
+      "response": []
+    },
+    {
+      "name": "Invalid Product ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{api_gateway_url}}/demo/products/invalid-id",
+          "host": ["{{api_gateway_url}}"],
+          "path": ["demo", "products", "invalid-id"]
+        },
+        "description": "Test với product ID không tồn tại (expect 404)"
+      },
+      "response": []
+    },
+    {
+      "name": "Create Request - Missing Fields",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Test User\"\n}"
+        },
+        "url": {
+          "raw": "{{api_gateway_url}}/demo/request",
+          "host": ["{{api_gateway_url}}"],
+          "path": ["demo", "request"]
+        },
+        "description": "Test validation - missing required fields (expect 400)"
+      },
+      "response": []
+    },
+    {
+      "name": "Create Request - Invalid Email",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"invalid-email\",\n  \"productId\": \"demo-1\"\n}"
+        },
+        "url": {
+          "raw": "{{api_gateway_url}}/demo/request",
+          "host": ["{{api_gateway_url}}"],
+          "path": ["demo", "request"]
+        },
+        "description": "Test validation - invalid email format (expect 400)"
+      },
+      "response": []
+    }
+  ]
+}

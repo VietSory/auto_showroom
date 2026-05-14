@@ -1,0 +1,13 @@
+{
+  "name": "demo-products-lambda",
+  "version": "1.0.0",
+  "description": "AWS Lambda function for demo products API",
+  "type": "module",
+  "main": "demo-products-handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["aws", "lambda", "api-gateway", "demo"],
+  "author": "",
+  "license": "ISC"
+}

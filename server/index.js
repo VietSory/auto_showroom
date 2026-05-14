@@ -13,6 +13,7 @@ import nofiticationRoutes from "./routes/notification.route.js";
 import carRoutes from "./routes/car.route.js";
 import voucherRoutes from "./routes/voucher.route.js";
 import orderRoutes from "./routes/order.route.js";
+import demoRoutes from "./routes/demo.route.js";
 
 import connectMongoDB from "./db/connectMongoDB.js";
 import cors from "cors";
@@ -89,6 +90,7 @@ app.use("/api/notifications", nofiticationRoutes);
 app.use("/api/car", carRoutes);
 app.use("/api/vouchers", voucherRoutes);
 app.use("/api/order", orderRoutes);
+app.use("/api/demo", demoRoutes);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production' && process.env.SERVE_CLIENT === 'true') {

@@ -42,6 +42,8 @@ const PaymentLayoutBuyNow = lazy(() => import('./_shop/buynow/PaymentLayoutBuyNo
 const AboutUs = lazy(() => import('./_aboutUs').then(module => ({ default: module.AboutUs })));
 const NotFound = lazy(() => import('./_auth/NotFound'));
 const OrderLayout = lazy(() => import('./_shop/Order/OrderLayout'));
+const DemoPage = lazy(() => import('./_demo').then(module => ({ default: module.DemoPage })));
+const LambdaTesterPage = lazy(() => import('./_demo').then(module => ({ default: module.LambdaTesterPage })));
 
 const App = () => {
     const location = useLocation();
@@ -132,6 +134,8 @@ const App = () => {
                     <Route path="/about-us" element={<AboutUs />} />
                     <Route path="/voucher" element={<Voucherlayout />} />
                     <Route path="/order" element={<OrderLayout />} />
+                    <Route path="/demo" element={<DemoPage />} />
+                    <Route path="/lambda-tester" element={<LambdaTesterPage />} />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
                 {location.pathname.startsWith('/social') && authUser && (
