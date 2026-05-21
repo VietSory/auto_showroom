@@ -4,7 +4,11 @@ import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 
 // API Gateway endpoint - Sẽ được cập nhật sau khi deploy Lambda
-const API_GATEWAY_URL = import.meta.env.VITE_API_GATEWAY_URL || 'https://your-api-id.execute-api.region.amazonaws.com/prod';
+const API_GATEWAY_URL = import.meta.env.VITE_API_GATEWAY_URL;
+const DEMO_API_KEY = import.meta.env.VITE_DEMO_API_KEY;
+
+// Helper function to clean API URL
+const cleanApiUrl = (url: string) => url.replace(/\/+$/, '');
 
 interface DemoProduct {
     id: string;
@@ -52,18 +56,31 @@ const DemoPage = () => {
     const fetchProducts = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${API_GATEWAY_URL}/demo/products?limit=10`);
+            const url = `${cleanApiUrl(API_GATEWAY_URL)}/demo/products?limit=10`;
+            console.log('Fetching from:', url);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'x-api-key': DEMO_API_KEY,
+                },
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             const data = await response.json();
             
             if (data.success) {
                 setProducts(data.data);
-                toast.success(`Loaded ${data.count} demo products from ${data.source}`);
+                toast.success(`Đã tải ${data.count} sản phẩm`);
             } else {
-                toast.error('Failed to load products');
+                toast.error(data.message || 'Không thể tải sản phẩm');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error fetching products:', error);
-            toast.error('Error connecting to API Gateway');
+            toast.error(`Lỗi: ${error.message}`);
         } finally {
             setLoading(false);
         }
@@ -72,18 +89,29 @@ const DemoPage = () => {
     const fetchProductDetails = async (productId: string) => {
         setLoading(true);
         try {
-            const response = await fetch(`${API_GATEWAY_URL}/demo/products/${productId}`);
+            const url = `${cleanApiUrl(API_GATEWAY_URL)}/demo/products/${productId}`;
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'x-api-key': DEMO_API_KEY,
+                },
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
             const data = await response.json();
             
             if (data.success) {
                 setSelectedProduct(data.data);
-                toast.success('Product details loaded');
+                toast.success('Đã tải chi tiết sản phẩm');
             } else {
-                toast.error('Failed to load product details');
+                toast.error(data.message || 'Không thể tải chi tiết');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error fetching product details:', error);
-            toast.error('Error connecting to API Gateway');
+            toast.error(`Lỗi: ${error.message}`);
         } finally {
             setLoading(false);
         }
@@ -94,18 +122,24 @@ const DemoPage = () => {
         setLoading(true);
 
         try {
-            const response = await fetch(`${API_GATEWAY_URL}/demo/request`, {
+            const url = `${cleanApiUrl(API_GATEWAY_URL)}/demo/request`;
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'x-api-key': DEMO_API_KEY,
                 },
                 body: JSON.stringify(formData)
             });
 
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
             const data = await response.json();
 
             if (data.success) {
-                toast.success('Demo request submitted successfully!');
+                toast.success('Đã gửi yêu cầu thành công!');
                 setShowRequestForm(false);
                 setFormData({
                     name: '',
@@ -115,11 +149,11 @@ const DemoPage = () => {
                     message: ''
                 });
             } else {
-                toast.error(data.message || 'Failed to submit request');
+                toast.error(data.message || 'Không thể gửi yêu cầu');
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error submitting request:', error);
-            toast.error('Error connecting to API Gateway');
+            toast.error(`Lỗi: ${error.message}`);
         } finally {
             setLoading(false);
         }
@@ -133,27 +167,24 @@ const DemoPage = () => {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
             {/* Header */}
-            <div className="bg-black/50 backdrop-blur-md border-b border-gray-700 sticky top-0 z-50">
-                <div className="container mx-auto px-4 py-6">
+            <div className="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
+                <div className="container mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                                AWS Lambda Demo
+                            <h1 className="text-2xl font-bold text-white">
+                                Demo Sản Phẩm
                             </h1>
                             <p className="text-gray-400 text-sm mt-1">
-                                Powered by API Gateway + Lambda + EC2
+                                API Gateway + Lambda
                             </p>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
                             <Link
                                 to="/lambda-tester"
-                                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition text-sm"
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-sm"
                             >
-                                🧪 Lambda Tester
+                                Test API
                             </Link>
-                            <div className="px-4 py-2 bg-green-500/20 border border-green-500 rounded-lg">
-                                <span className="text-green-400 text-sm font-semibold">🟢 Live</span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -161,41 +192,43 @@ const DemoPage = () => {
 
             <div className="container mx-auto px-4 py-12">
                 {/* Info Banner */}
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-6 mb-12"
-                >
-                    <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                        <span className="text-2xl">ℹ️</span>
-                        Về chức năng Demo này
+                <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4 mb-8">
+                    <h2 className="text-lg font-semibold mb-2 text-white">
+                        Hướng dẫn sử dụng
                     </h2>
-                    <ul className="space-y-2 text-gray-300">
-                        <li>✅ API được xử lý bởi <strong>AWS Lambda</strong> (serverless)</li>
-                        <li>✅ Request đi qua <strong>AWS API Gateway</strong></li>
-                        <li>✅ Frontend (S3) → API Gateway → Lambda → (Optional) EC2 Backend</li>
-                        <li>✅ Không cần authentication - Public API</li>
-                        <li>✅ CORS đã được cấu hình</li>
+                    <ul className="space-y-1 text-gray-300 text-sm">
+                        <li>1. Xem danh sách sản phẩm demo từ Lambda</li>
+                        <li>2. Click "Xem chi tiết" để xem thông tin đầy đủ</li>
+                        <li>3. Click "Yêu cầu demo" để gửi form liên hệ</li>
+                        <li>4. Click "Test API" ở góc trên để test Lambda function</li>
                     </ul>
-                </motion.div>
+                    <div className="mt-3 text-xs text-gray-400">
+                        API Endpoint: {cleanApiUrl(API_GATEWAY_URL)}
+                    </div>
+                </div>
 
                 {/* Products Grid */}
                 <div className="mb-12">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold">Demo Products</h2>
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-xl font-bold">Danh sách sản phẩm</h2>
                         <button
                             onClick={fetchProducts}
                             disabled={loading}
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition disabled:opacity-50"
+                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition disabled:opacity-50 text-sm"
                         >
-                            {loading ? 'Loading...' : 'Refresh'}
+                            {loading ? 'Đang tải...' : 'Tải lại'}
                         </button>
                     </div>
 
                     {loading && products.length === 0 ? (
                         <div className="text-center py-12">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-                            <p className="mt-4 text-gray-400">Loading products from Lambda...</p>
+                            <p className="mt-4 text-gray-400">Đang tải sản phẩm...</p>
+                        </div>
+                    ) : products.length === 0 ? (
+                        <div className="text-center py-12 bg-gray-800/50 rounded-lg">
+                            <p className="text-gray-400 mb-4">Chưa có sản phẩm</p>
+                            <p className="text-sm text-gray-500">Kiểm tra API Gateway URL trong file .env</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

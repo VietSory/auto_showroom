@@ -53,31 +53,6 @@ const TEST_CASES: TestCase[] = [
             productId: 'demo-1',
             message: 'I want to test drive this car'
         }
-    },
-    {
-        id: 'test-5',
-        name: 'POST Request - Missing Fields',
-        method: 'POST',
-        endpoint: '/demo/request',
-        description: 'Test validation - thiếu required fields (expect 400)',
-        body: {
-            name: 'Test User'
-            // Missing email and productId
-        }
-    },
-    {
-        id: 'test-6',
-        name: 'GET Invalid Product ID',
-        method: 'GET',
-        endpoint: '/demo/products/invalid-id',
-        description: 'Test với product ID không tồn tại (expect 404)'
-    },
-    {
-        id: 'test-7',
-        name: 'OPTIONS - CORS Preflight',
-        method: 'OPTIONS',
-        endpoint: '/demo/products',
-        description: 'Test CORS preflight request'
     }
 ];
 
@@ -122,6 +97,7 @@ const LambdaTesterPage = () => {
                 method: testCase.method,
                 headers: {
                     'Content-Type': 'application/json',
+                    'x-api-key': import.meta.env.VITE_DEMO_API_KEY,
                 }
             };
 
@@ -205,16 +181,21 @@ const LambdaTesterPage = () => {
             return;
         }
 
-        const customTest: TestCase = {
-            id: 'custom',
-            name: 'Custom Test',
-            method: customMethod,
-            endpoint: customEndpoint,
-            description: 'Custom API test',
-            body: customBody ? JSON.parse(customBody) : undefined
-        };
+        try {
+            const customTest: TestCase = {
+                id: 'custom',
+                name: 'Custom Test',
+                method: customMethod,
+                endpoint: customEndpoint,
+                description: 'Custom API test',
+                body: customBody ? JSON.parse(customBody) : undefined
+            };
 
-        await runTest(customTest);
+            setSelectedTest('custom'); // Auto-select custom test to show results
+            await runTest(customTest);
+        } catch (error: any) {
+            toast.error(`Invalid JSON: ${error.message}`);
+        }
     };
 
     const getStatusColor = (status?: 'pending' | 'success' | 'error') => {
@@ -236,7 +217,7 @@ const LambdaTesterPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+        <div className="min-h-screen w-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white overflow-x-hidden">
             {/* Header */}
             <div className="bg-black/50 backdrop-blur-md border-b border-gray-700 sticky top-0 z-50">
                 <div className="container mx-auto px-4 py-6">
@@ -408,7 +389,7 @@ const LambdaTesterPage = () => {
                             >
                                 <div className="flex items-center justify-between mb-4">
                                     <h3 className="text-xl font-semibold">
-                                        {TEST_CASES.find(t => t.id === selectedTest)?.name}
+                                        {TEST_CASES.find(t => t.id === selectedTest)?.name || 'Custom Test'}
                                     </h3>
                                     <span className={`px-3 py-1 rounded-full text-sm font-semibold border ${getStatusColor(results[selectedTest].status)}`}>
                                         {getStatusIcon(results[selectedTest].status)} {results[selectedTest].statusCode || 'N/A'}
@@ -450,6 +431,13 @@ const LambdaTesterPage = () => {
                                     </div>
                                 </div>
                             </motion.div>
+                        ) : selectedTest === 'custom' && !results['custom'] ? (
+                            <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-12 text-center">
+                                <div className="text-6xl mb-4">⏳</div>
+                                <p className="text-gray-400">
+                                    Running custom test...
+                                </p>
+                            </div>
                         ) : (
                             <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-12 text-center">
                                 <div className="text-6xl mb-4">🧪</div>

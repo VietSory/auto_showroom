@@ -1,0 +1,5 @@
+{
+  "httpMethod": "POST",
+  "path": "/prod/demo/request",
+  "body": "{\"name\":\"Test User\",\"email\":\"test@example.com\",\"productId\":\"demo-1\",\"phone\":\"+84 123 456 789\",\"message\":\"Test message\"}"
+}

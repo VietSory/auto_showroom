@@ -336,15 +336,18 @@ export const handler = async (event) => {
         const method = event.httpMethod || event.requestContext?.http?.method || 'GET';
 
         // Route handling
-        if (method === 'GET' && path === '/demo/products') {
+        // Normalize path (remove trailing slash and handle both /prod prefix and without)
+        const normalizedPath = path.replace(/^\/prod/, '').replace(/\/$/, '');
+        
+        if (method === 'GET' && normalizedPath === '/demo/products') {
             return await getProducts(event);
         }
         
-        if (method === 'GET' && path.match(/^\/demo\/products\/[^/]+$/)) {
+        if (method === 'GET' && normalizedPath.match(/^\/demo\/products\/[^/]+$/)) {
             return await getProductById(event);
         }
         
-        if (method === 'POST' && path === '/demo/request') {
+        if (method === 'POST' && normalizedPath === '/demo/request') {
             return await createDemoRequest(event);
         }
 

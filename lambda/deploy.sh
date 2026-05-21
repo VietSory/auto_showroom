@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Script để package và deploy Lambda function
 # Usage: ./deploy.sh [function-name] [region]
